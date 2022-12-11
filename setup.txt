@@ -1,0 +1,49 @@
+https://www.igniterealtime.org/downloads/#openfire
+https://download.igniterealtime.org/openfire/docs/latest/documentation/install-guide.html
+
+
+
+Pobierz postgresql https://www.postgresql.org/download/
+
+Pomocne komendy w powłoce psql
+\q - wyjście
+\conninfo
+\list - pokazuje istniejące bazy danych
+select * from pg_user; - pokazuje użytkowników
+SHOW port;
+
+### Należy pamiętać, aby user nazywał się aasduser
+$ sudo -u postgres createuser --interactive
+n
+n
+n
+
+W powłoce psql aby wejść 
+$ sudo -u postgres psql
+# create tablespace aasdspace location '/home/gfausak/gdziejestprojekt/postgres';
+# create database aasddb with tablespace = aasdspace;
+# grant all privileges on database aasddb to aasduser;
+# alter user aasduser with password 'aasduser';
+
+Aby się zalogować jako zwykły user
+# psql -h localhost -d aasddb -U aasduser [-p <port>]
+
+
+
+
+Wejdź na http://127.0.0.1:9090/  aby zakończyć konfigurację.
+domain name aasd-domain
+host name aasdhostname
+property encryption key - wpiszcie w oba pola aasd
+standard database connection
+driver presets - postgresql
+database url - HOSTNAME -> localhost   ; DATABASENAME -> aasddb
+username - aasduser
+password - aasduser
+connection timeout - 0.5
+zaznacz - only hashed passwords
+administrator account - nic nie zmieniaj - skip this step
+login i hasło - admin
+
+
+openfire -> użytkownicy -> utwórz nowego użytkownika - tworzymy jak chcemy ale zapewne już to powinno być w bazie.
