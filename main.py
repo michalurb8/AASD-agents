@@ -24,7 +24,7 @@ agents = []
 for name in lista:
     # verify_security = False - ważne z powodu braku certyfikatu serwera
     # lub tego, że certyfikat jest podpisany przez samego siebie.
-    myAgent=MyAgent(name+"@localhost", "polskagora", verify_security=False)
+    myAgent=MyAgent(name+"@hookipa.net", "polskagora", verify_security=False)
     agents.append(myAgent)
     future=myAgent.start()
     future.result()
