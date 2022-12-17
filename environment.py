@@ -32,6 +32,10 @@ class FPS():
             
 class EnvironmentAgent(Agent):
     class TimeBehav(CyclicBehaviour):
+        def __init__(self):
+            super().__init__()
+            self._firstRun = False
+
         async def on_start(self) -> None:
             self.logger = logging.getLogger(defaults.PROJECT_VARS['ENV_LOGGER_NAME'])
             self.logger.info("Starting behaviour . . .")
@@ -101,14 +105,25 @@ class EnvironmentAgent(Agent):
             self.fps()
 
             self._setKnowledgeItems()
+            self._firstRun = True
             self._customAwait()        
 
     async def setup(self):
         self.logger = logging.getLogger(defaults.PROJECT_VARS['ENV_LOGGER_NAME'])
 
         self.logger.info("Agent starting . . .")
-        timeb = self.TimeBehav()
-        self.add_behaviour(timeb)
+        self.timebehav = self.TimeBehav()
+        self.add_behaviour(self.timebehav)
+
+    def isSetup(self):
+        """
+            Check if the setup of the environment behaviour is done.
+            Use this as:
+            
+            while envAgent.isSetup():
+                continue
+        """
+        return not self.timebehav._firstRun
 
 if __name__ == "__main__":
     envAgent = EnvironmentAgent(
@@ -117,7 +132,9 @@ if __name__ == "__main__":
     )
     future = envAgent.start()
     future.result()
-    time.sleep(1)
+    
+    while envAgent.isSetup():
+        continue
 
     try:
         while(True):
