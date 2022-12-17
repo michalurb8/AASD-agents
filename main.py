@@ -1,6 +1,7 @@
 import time
 from spade import agent, quit_spade
 from aioxmpp import PresenceShow
+import defaults
 
 import signal, sys
 
@@ -24,7 +25,7 @@ agents = []
 for name in lista:
     # verify_security = False - ważne z powodu braku certyfikatu serwera
     # lub tego, że certyfikat jest podpisany przez samego siebie.
-    myAgent=MyAgent(name+"@localhost", "polskagora", verify_security=False)
+    myAgent=MyAgent(name + '@' + defaults.PROJECT_VARS['SERVER'], "polskagora", verify_security=False)
     agents.append(myAgent)
     future=myAgent.start()
     future.result()
