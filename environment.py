@@ -1,5 +1,6 @@
 
 import logging, time, math
+from logging import Logger
 from spade import quit_spade
 from spade.template import Template
 from spade.agent import Agent
@@ -8,6 +9,7 @@ from defaults import PROJECT_VARS
 from surface import Surface
 import numpy as np
 from abc import abstractmethod
+from utils import prepareDefaultLogger
 
 ENV_TIME_SIM_SECONDS = 'simulated_runtime'
 ENV_TIME_RUNTIME_SECONDS = 'runtime'
@@ -34,7 +36,7 @@ class FPS():
             self.lastT = current
 
 class CyclicLogger():
-    def __init__(self, logger, loggerPrefix: str, timeout: int=1e+9) -> None:
+    def __init__(self, logger: Logger, loggerPrefix: str, timeout: int=1e+9) -> None:
         self.logger = logger
         self.loggerPrefix = loggerPrefix
         self.timeout = timeout
@@ -42,13 +44,13 @@ class CyclicLogger():
         self.lastLogTime = time.time_ns()
 
     def add(self, **kwargs) -> None:
-        self.storedData = self.storedData | kwargs
+        self.storedData = self.storedData | dict(kwargs)
 
     def tryFlush(self) -> None:
-        if(time.time_ns() - self.lastLogTime >= 1e+9):
+        if(time.time_ns() - self.lastLogTime >= self.timeout):
             s = f"{self.loggerPrefix} "
             for k, v in self.storedData.items():
-                s += f"-{k}: {v}"
+                s += f"-{k}: {v} "
             self.logger.info(s)
             self.lastLogTime = time.time_ns()
             self.storedData = {}
@@ -57,7 +59,7 @@ class TimeBehaviour(CyclicBehaviour):
     def __init__(self, logger, loggerPrefix: str, sleepType: str, envTicks: float, envSimSpeed: float):
         super().__init__()
         self._firstRun = False
-        self.cyclicLogger = CyclicLogger(logger=logger, loggerPrefix=loggerPrefix)
+        self.cyclicLogger = CyclicLogger(logger=logger, loggerPrefix=loggerPrefix, timeout=1e+9 - 1e+8)
         self.logger = logger
         self.loggerPrefix = loggerPrefix
         self.sleepType = sleepType
@@ -115,6 +117,7 @@ class TimeBehaviour(CyclicBehaviour):
             step=self.stepCounter,
             fps=self.fps.get(),
         )
+        self.cyclicLogger.tryFlush()
 
     def _initKnowledgeItems(self):
         self.set('fps', 0.)
@@ -159,8 +162,7 @@ class GlobalEnvTimeBehaviour(TimeBehaviour):
 
 class GlobalEnvironmentAgent(Agent):
     async def setup(self):
-        self.logger = logging.getLogger(PROJECT_VARS['GLOB_ENV_LOGGER_NAME'])
-        self.logger.addHandler(logging.FileHandler(PROJECT_VARS['LOG_DIR'] + 'globalEnv.log'))
+        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['GLOB_ENV_LOGGER_NAME'], name = 'globalEnv.log')
 
         self.logger.info("Agent starting . . .")
         self.timebehav = GlobalEnvTimeBehaviour(
@@ -213,8 +215,7 @@ class GlobalEnvironmentAgent(Agent):
 class LocalEnvironment(Agent):
         
     async def setup(self) -> None:
-        self.logger = logging.getLogger(PROJECT_VARS['LOCAL_ENV_LOGGER_NAME'] + f'_{self.name}')
-        self.logger.addHandler(logging.FileHandler(PROJECT_VARS['LOG_DIR'] + f'localEnv.{self.name}.log'))
+        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['LOCAL_ENV_LOGGER_NAME'], name = f'localEnv.{self.name}.log')
 
         self.logger.info(f"Agent {self.name} starting . . .")
         self.timebehav = GlobalEnvTimeBehaviour(
