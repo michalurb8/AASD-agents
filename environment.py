@@ -162,7 +162,7 @@ class GlobalEnvTimeBehaviour(TimeBehaviour):
 
 class GlobalEnvironmentAgent(Agent):
     async def setup(self):
-        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['GLOB_ENV_LOGGER_NAME'], name = 'globalEnv.log')
+        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['GLOB_ENV_LOGGER_NAME'], fileName='globalEnv.log')
 
         self.logger.info("Agent starting . . .")
         self.timebehav = GlobalEnvTimeBehaviour(
@@ -215,7 +215,7 @@ class GlobalEnvironmentAgent(Agent):
 class LocalEnvironment(Agent):
         
     async def setup(self) -> None:
-        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['LOCAL_ENV_LOGGER_NAME'], name = f'localEnv.{self.name}.log')
+        self.logger = prepareDefaultLogger(loggerName=PROJECT_VARS['LOCAL_ENV_LOGGER_NAME'], fileName=f'localEnv.{self.name}.log')
 
         self.logger.info(f"Agent {self.name} starting . . .")
         self.timebehav = GlobalEnvTimeBehaviour(
